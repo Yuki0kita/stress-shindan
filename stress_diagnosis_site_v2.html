@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>会社員ストレス診断</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;700;900&family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --ink:#1a1a1a;--ink2:#444;--ink3:#888;
+  --bg:#faf9f6;--bg2:#f2f0eb;
+  --accent:#c94a2e;--accent2:#e8a87c;
+  --border:#ddd8ce;--white:#fff;
+  --serif:'Noto Serif JP',serif;
+  --sans:'Noto Sans JP',sans-serif;
+}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);overflow-x:hidden}
+
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:18px 40px;
+  background:rgba(26,26,26,.93);backdrop-filter:blur(12px);
+  border-bottom:1px solid rgba(255,255,255,.06);
+}
+.nav-logo{font-family:var(--serif);font-size:17px;font-weight:900;color:var(--white);letter-spacing:.05em}
+.nav-logo span{color:var(--accent)}
+.nav-links{display:flex;gap:28px;align-items:center}
+.nav-links a{font-size:13px;color:rgba(255,255,255,.5);text-decoration:none;letter-spacing:.05em;transition:color .2s}
+.nav-links a:hover{color:var(--white)}
+.nav-cta{background:var(--accent);color:var(--white)!important;padding:8px 20px;font-weight:700}
+
+/* HERO */
+.hero{min-height:100vh;display:grid;grid-template-columns:1fr 1fr;position:relative;overflow:hidden}
+.hero-left{background:var(--ink);padding:100px 60px 80px;display:flex;flex-direction:column;justify-content:center;position:relative}
+.hero-right{background:var(--bg2);padding:100px 60px 80px;display:flex;flex-direction:column;justify-content:center}
+.label{font-size:11px;letter-spacing:.2em;font-weight:500;text-transform:uppercase;color:var(--accent2);margin-bottom:20px}
+.hero-title{font-family:var(--serif);font-size:clamp(34px,4.5vw,58px);font-weight:900;line-height:1.25;color:var(--white);margin-bottom:20px}
+.hero-title span{color:var(--accent2)}
+.hero-sub{font-size:14px;color:rgba(255,255,255,.5);line-height:2.2;margin-bottom:40px;font-weight:300}
+.btn-primary{
+  display:inline-flex;align-items:center;gap:10px;
+  background:var(--accent);color:var(--white);
+  font-size:15px;font-weight:700;font-family:var(--sans);
+  padding:18px 36px;border:none;cursor:pointer;transition:all .2s;width:fit-content;letter-spacing:.05em
+}
+.btn-primary:hover{background:#b03d22;transform:translateY(-2px)}
+.hero-stats{display:flex;gap:36px;margin-top:44px}
+.stat{border-left:2px solid var(--accent);padding-left:14px}
+.stat-num{font-family:var(--serif);font-size:26px;font-weight:700;color:var(--white)}
+.stat-label{font-size:11px;color:rgba(255,255,255,.4);margin-top:2px;letter-spacing:.05em}
+
+/* あるある吹き出し */
+.aru-scroll{overflow:hidden;margin-bottom:28px}
+.aru-track{display:flex;gap:12px;animation:slide 22s linear infinite;width:max-content}
+.aru-track:hover{animation-play-state:paused}
+.aru-tag{
+  background:var(--white);border:1px solid var(--border);
+  font-size:13px;font-weight:500;color:var(--ink2);
+  padding:10px 18px;white-space:nowrap;flex-shrink:0;
+}
+@keyframes slide{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+
+.symptom-list{list-style:none;display:flex;flex-direction:column;gap:10px;margin-bottom:28px}
+.symptom-list li{
+  display:flex;align-items:center;gap:12px;
+  font-size:13px;color:var(--ink2);
+  padding:12px 16px;background:var(--white);border:1px solid var(--border);
+}
+.symptom-list li::before{content:'';width:7px;height:7px;border-radius:50%;background:var(--accent);flex-shrink:0}
+.live-box{padding:20px 24px;background:var(--white);border:1px solid var(--border)}
+.live-count{font-family:var(--serif);font-size:32px;font-weight:900;color:var(--accent)}
+.live-sub{font-size:11px;color:var(--ink3);margin-top:4px}
+.progress-bar{height:3px;background:var(--border);margin-top:12px;position:relative}
+.progress-fill{position:absolute;left:0;top:0;height:100%;background:var(--accent);width:0;transition:width 2s ease}
+
+/* QUIZ */
+.section{padding:90px 0}
+.container{max-width:1100px;margin:0 auto;padding:0 40px}
+.section-label{font-size:11px;letter-spacing:.2em;font-weight:700;text-transform:uppercase;color:var(--accent);margin-bottom:14px}
+.section-title{font-family:var(--serif);font-size:clamp(26px,3.5vw,44px);font-weight:900;line-height:1.25;margin-bottom:44px}
+
+.quiz-wrapper{background:var(--ink);padding:56px;position:relative;overflow:hidden}
+.quiz-wrapper::before{
+  content:'？';position:absolute;top:-30px;right:32px;
+  font-family:var(--serif);font-size:280px;font-weight:900;
+  color:rgba(255,255,255,.025);line-height:1;pointer-events:none
+}
+.quiz-num{font-size:12px;color:rgba(255,255,255,.3);letter-spacing:.15em;margin-bottom:16px}
+.quiz-q{font-family:var(--serif);font-size:clamp(19px,2.8vw,28px);font-weight:700;color:var(--white);line-height:1.65;margin-bottom:36px}
+.quiz-q .aru{
+  display:inline-block;background:rgba(201,74,46,.2);
+  border-left:3px solid var(--accent);
+  color:rgba(255,255,255,.55);font-size:.8em;font-family:var(--sans);
+  padding:4px 10px;margin-left:8px;font-weight:400;vertical-align:middle;
+}
+.quiz-options{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.quiz-btn{
+  background:transparent;border:1px solid rgba(255,255,255,.13);
+  color:rgba(255,255,255,.65);font-family:var(--sans);
+  font-size:14px;padding:18px 22px;text-align:left;cursor:pointer;transition:all .15s;
+}
+.quiz-btn:hover{background:rgba(201,74,46,.15);border-color:var(--accent);color:var(--white)}
+.quiz-btn.selected{background:var(--accent);border-color:var(--accent);color:var(--white)}
+.quiz-btn span{font-size:10px;opacity:.45;display:block;margin-bottom:4px;letter-spacing:.1em}
+.quiz-progress{display:flex;gap:5px;margin-top:36px}
+.quiz-dot{width:22px;height:3px;background:rgba(255,255,255,.12);transition:background .3s}
+.quiz-dot.done{background:var(--accent)}
+.quiz-dot.active{background:rgba(255,255,255,.45)}
+
+/* RESULT */
+.result-preview{margin-top:48px;padding:40px;background:var(--white);border:2px solid var(--accent);display:none}
+.result-preview.show{display:block}
+.result-level{font-size:12px;letter-spacing:.15em;color:var(--accent);font-weight:700;margin-bottom:10px}
+.result-title{font-family:var(--serif);font-size:clamp(20px,2.8vw,32px);font-weight:900;margin-bottom:14px}
+.result-type-badge{
+  display:inline-block;background:var(--bg2);
+  border:1px solid var(--border);font-size:12px;
+  font-weight:700;letter-spacing:.1em;padding:4px 16px;margin-bottom:20px;color:var(--ink2);
+}
+.result-desc{font-size:14px;color:var(--ink2);line-height:2.2;margin-bottom:24px}
+.result-aru{
+  background:var(--bg2);border-left:3px solid var(--accent2);
+  padding:16px 20px;margin-bottom:24px;
+}
+.result-aru p{font-size:13px;color:var(--ink2);line-height:2}
+.result-aru strong{color:var(--accent);font-weight:700}
+.result-cta{display:flex;gap:12px;flex-wrap:wrap}
+.btn-line{
+  display:inline-flex;align-items:center;gap:8px;
+  background:#06C755;color:var(--white);
+  font-size:14px;font-weight:700;padding:14px 28px;border:none;cursor:pointer;transition:all .2s;
+}
+.btn-share{
+  display:inline-flex;align-items:center;gap:8px;
+  background:transparent;border:1px solid var(--border);
+  color:var(--ink);font-size:14px;padding:14px 24px;cursor:pointer;transition:all .2s;
+}
+.btn-share:hover{background:var(--bg2)}
+
+/* TYPES */
+.types-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:2px;background:var(--border)}
+.type-card{
+  background:var(--white);padding:32px 26px;cursor:pointer;
+  transition:all .2s;position:relative;overflow:hidden;
+}
+.type-card:hover{background:var(--ink);color:var(--white)}
+.type-card:hover .type-tag{color:var(--accent2)}
+.type-card:hover .type-title,.type-card:hover .type-desc{color:inherit}
+.type-card:hover .type-desc{color:rgba(255,255,255,.5)}
+.type-num{font-family:var(--serif);font-size:64px;font-weight:900;color:var(--bg2);line-height:1;margin-bottom:12px;transition:color .2s}
+.type-card:hover .type-num{color:rgba(255,255,255,.05)}
+.type-tag{font-size:10px;letter-spacing:.15em;font-weight:700;color:var(--accent);text-transform:uppercase;margin-bottom:6px;transition:color .2s}
+.type-title{font-family:var(--serif);font-size:20px;font-weight:700;margin-bottom:10px;line-height:1.3;transition:color .2s}
+.type-desc{font-size:12px;color:var(--ink3);line-height:1.9;transition:color .2s}
+.type-aru{
+  margin-top:14px;padding-top:14px;border-top:1px solid var(--border);
+  font-size:11px;color:var(--ink3);font-style:italic;transition:all .2s;
+}
+.type-card:hover .type-aru{border-color:rgba(255,255,255,.1);color:rgba(255,255,255,.3)}
+
+/* ARTICLES */
+.articles-layout{display:grid;grid-template-columns:2fr 1fr;gap:36px}
+.article-main{background:var(--white);border:1px solid var(--border);overflow:hidden;cursor:pointer;transition:all .2s}
+.article-main-img{height:260px;background:var(--bg2);display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:72px;font-weight:900;color:var(--border);transition:background .3s}
+.article-main:hover .article-main-img{background:#e0dcd4}
+.article-main-body{padding:28px}
+.article-cat{font-size:10px;letter-spacing:.15em;font-weight:700;color:var(--accent);text-transform:uppercase;margin-bottom:10px}
+.article-main-title{font-family:var(--serif);font-size:clamp(16px,2.2vw,24px);font-weight:700;line-height:1.55;margin-bottom:10px}
+.article-main-desc{font-size:13px;color:var(--ink3);line-height:2}
+.article-list{display:flex;flex-direction:column;gap:2px;background:var(--border)}
+.article-item{background:var(--white);padding:18px 22px;cursor:pointer;transition:background .2s}
+.article-item:hover{background:var(--bg2)}
+.article-item-cat{font-size:10px;letter-spacing:.1em;font-weight:700;color:var(--accent);margin-bottom:5px}
+.article-item-title{font-size:13px;font-weight:700;line-height:1.6;margin-bottom:5px}
+.article-item-meta{font-size:11px;color:var(--ink3)}
+
+/* VOICE */
+.voice-section{background:var(--ink);padding:90px 0;position:relative;overflow:hidden}
+.voice-section::before{
+  content:'本音';position:absolute;top:50%;left:-10px;transform:translateY(-50%);
+  font-family:var(--serif);font-size:180px;font-weight:900;color:rgba(255,255,255,.025);pointer-events:none;white-space:nowrap;
+}
+.voice-grid{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:start}
+.voice-cards{display:flex;flex-direction:column;gap:14px}
+.voice-card{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.07);padding:20px 22px}
+.voice-header{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.voice-avatar{width:34px;height:34px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:13px;font-weight:700;color:var(--white);flex-shrink:0}
+.voice-name{font-size:12px;font-weight:500;color:rgba(255,255,255,.65)}
+.voice-meta{font-size:10px;color:rgba(255,255,255,.28);margin-top:2px}
+.voice-text{font-size:13px;color:rgba(255,255,255,.5);line-height:2.1}
+.voice-tag{display:inline-block;background:rgba(201,74,46,.18);color:var(--accent2);font-size:10px;font-weight:700;letter-spacing:.1em;padding:3px 10px;margin-top:10px}
+
+/* CTA */
+.cta-section{padding:110px 0;text-align:center;border-top:1px solid var(--border)}
+.cta-title{font-family:var(--serif);font-size:clamp(28px,4.5vw,54px);font-weight:900;line-height:1.25;margin-bottom:20px}
+.cta-title span{color:var(--accent)}
+.cta-sub{font-size:14px;color:var(--ink3);margin-bottom:44px;line-height:2}
+
+footer{background:var(--ink);padding:56px 0 36px}
+.footer-inner{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:20px}
+.footer-logo{font-family:var(--serif);font-size:18px;font-weight:900;color:var(--white);letter-spacing:.05em}
+.footer-links{display:flex;gap:20px}
+.footer-links a{font-size:12px;color:rgba(255,255,255,.3);text-decoration:none;letter-spacing:.05em}
+.footer-links a:hover{color:rgba(255,255,255,.65)}
+.footer-copy{border-top:1px solid rgba(255,255,255,.07);margin-top:36px;padding-top:22px;font-size:11px;color:rgba(255,255,255,.18);text-align:center}
+
+@media(max-width:768px){
+  .hero{grid-template-columns:1fr}
+  .hero-left,.hero-right{padding:80px 24px 60px}
+  .quiz-wrapper{padding:36px 22px}
+  .quiz-options{grid-template-columns:1fr}
+  .articles-layout{grid-template-columns:1fr}
+  .voice-grid{grid-template-columns:1fr}
+  .container{padding:0 20px}
+  nav{padding:14px 18px}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">会社員<span>ストレス</span>診断</div>
+  <div class="nav-links">
+    <a href="#">診断する</a>
+    <a href="#">8タイプ</a>
+    <a href="#">記事</a>
+    <a href="#">みんなの声</a>
+    <a href="#" class="nav-cta">無料で診断</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-left">
+    <div class="label">Worker's Stress Index 2026</div>
+    <h1 class="hero-title">「辞めたい」より<br><span>「休みたい」</span><br>が正直なところ</h1>
+    <p class="hero-sub">朝起きた瞬間の「帰りたい」、<br>日曜18時から始まるHP減少、<br>Teams通知音で削られる体力——<br>それ、全部ストレスのサインです。</p>
+    <button class="btn-primary" onclick="scrollToQuiz()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      3分で診断する（無料）
+    </button>
+    <div class="hero-stats">
+      <div class="stat"><div class="stat-num">48,000+</div><div class="stat-label">診断回数</div></div>
+      <div class="stat"><div class="stat-num">8タイプ</div><div class="stat-label">分類パターン</div></div>
+      <div class="stat"><div class="stat-num">94%</div><div class="stat-label">共感率</div></div>
+    </div>
+  </div>
+  <div class="hero-right">
+    <div class="aru-scroll">
+      <div class="aru-track" id="aru-track1">
+        <div class="aru-tag">起きた瞬間「帰りたい」</div>
+        <div class="aru-tag">Teams通知音でHP削られる</div>
+        <div class="aru-tag">日曜18時からHP減る</div>
+        <div class="aru-tag">「急ぎじゃない急ぎ」多すぎ</div>
+        <div class="aru-tag">会議で会議を増やす</div>
+        <div class="aru-tag">「一旦様子見」が永久に続く</div>
+        <div class="aru-tag">優しい人ほど便利屋化する</div>
+        <div class="aru-tag">起きた瞬間「帰りたい」</div>
+        <div class="aru-tag">Teams通知音でHP削られる</div>
+        <div class="aru-tag">日曜18時からHP減る</div>
+        <div class="aru-tag">「急ぎじゃない急ぎ」多すぎ</div>
+        <div class="aru-tag">会議で会議を増やす</div>
+        <div class="aru-tag">「一旦様子見」が永久に続く</div>
+        <div class="aru-tag">優しい人ほど便利屋化する</div>
+      </div>
+    </div>
+    <h2 style="font-family:var(--serif);font-size:22px;font-weight:700;margin-bottom:16px;line-height:1.5">こんな症状、最近ありませんか？</h2>
+    <ul class="symptom-list">
+      <li>台風・地震速報に少し期待してしまう</li>
+      <li>軽度インフルを願ってしまう</li>
+      <li>「もう無理」が毎月更新される</li>
+      <li>有給より「強制停止イベント」待ち</li>
+      <li>日曜18時から心の準備が始まる</li>
+    </ul>
+    <div class="live-box">
+      <div style="font-size:11px;color:var(--ink3);margin-bottom:8px;letter-spacing:.05em">現在の診断実施数</div>
+      <div class="live-count" id="counter">48,214</div>
+      <div class="live-sub">今日の診断：214件</div>
+      <div class="progress-bar"><div class="progress-fill" id="pbar"></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- QUIZ -->
+<section class="section" id="quiz-section">
+  <div class="container">
+    <div class="section-label">Diagnosis</div>
+    <h2 class="section-title">あなたの<br>ストレスを診断する</h2>
+
+    <div class="quiz-wrapper">
+      <div class="quiz-num" id="quiz-num">Q1 / 8</div>
+      <p class="quiz-q" id="quiz-q">起きた瞬間「帰りたい」と思うのは、週に何回くらいありますか？</p>
+      <div class="quiz-options" id="quiz-options"></div>
+      <div class="quiz-progress" id="quiz-progress"></div>
+    </div>
+
+    <div class="result-preview" id="result-preview">
+      <div class="result-level" id="result-level"></div>
+      <div class="result-type-badge" id="result-badge"></div>
+      <div class="result-title" id="result-title"></div>
+      <div class="result-aru" id="result-aru"></div>
+      <p class="result-desc" id="result-desc"></p>
+      <div class="result-cta">
+        <button class="btn-line">LINEで詳細を受け取る</button>
+        <button class="btn-share" onclick="shareResult()">X でシェアする</button>
+        <button class="btn-primary" style="font-size:13px;padding:14px 24px">対処法の記事を読む →</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TYPES -->
+<section class="section" style="background:var(--bg2);padding-top:72px;padding-bottom:72px">
+  <div class="container">
+    <div class="section-label">Type Classification</div>
+    <h2 class="section-title">8つの<br>ストレスタイプ</h2>
+    <div class="types-grid">
+      <div class="type-card">
+        <div class="type-num">01</div>
+        <div class="type-tag">Burnout</div>
+        <div class="type-title">燃え尽き型</div>
+        <div class="type-desc">全力でやり続けた結果、ある日突然動けなくなる。「改善したい人ほど疲弊する」典型。</div>
+        <div class="type-aru">「もう無理」が毎月更新される</div>
+      </div>
+      <div class="type-card">
+        <div class="type-num">02</div>
+        <div class="type-tag">Always ON</div>
+        <div class="type-title">スイッチOFF不能型</div>
+        <div class="type-desc">仕事が終わっても頭が切れない。通知を見るだけで消耗。帰宅後も「無」になれない。</div>
+        <div class="type-aru">Teams通知音でHP削られる</div>
+      </div>
+      <div class="type-card">
+        <div class="type-num">03</div>
+        <div class="type-tag">Suppression</div>
+        <div class="type-title">感情飲み込み型</div>
+        <div class="type-desc">「これ意味あるんですか？」を飲み込み続ける。本音は会議後の立ち話にしか出てこない。</div>
+        <div class="type-aru">「確認します」だけで終わる会議</div>
+      </div>
+      <div class="type-card">
+        <div class="type-num">04</div>
+        <div class="type-tag">No Control</div>
+        <div class="type-title">コントロール不能型</div>
+        <div class="type-desc">自分で決められない仕事ばかり。「一旦様子見」が永久に続く組織で消耗している。</div>
+        <div class="type-aru">「誰も全体像を分かってない」</div>
+      </div>
+      <div class="type-card">
+        <div class="type-num">05</div>
+        <div class="type-tag">Isolation</div>
+        <div class="type-title">孤立無援型</div>
+        <div class="type-desc">詳しい人のLINEに直電が社内インフラ化している。問題を一人で引き受けがち。</div>
+        <div class="type-aru">引き継ぎ資料が引き継ぐ気ゼロ</div>
+      </div>
+      <div class="type-card">
+        <div class="type-num">06</div>
+        <div class="type-tag">Disengaged</div>
+        <div class="type-title">冷め切り型</div>
+        <div class="type-desc">3年目で「期待しすぎない」が最適解になった。淡々モードで生存しているが、空虚感が強い。</div>
+        <div class="type-aru">金曜夜だけ人格が違う</div>
+      </div>
+      <div class="type-card">
+        <div class="type-num">07</div>
+        <div class="type-tag">Hypervigilance</div>
+        <div class="type-title">過緊張・顔色読み型</div>
+        <div class="type-desc">偉い人が来た瞬間に空気が変わる職場で神経をすり減らしている。雑談力が強い人だけ生き残る。</div>
+        <div class="type-aru">仕事より人で削られる</div>
+      </div>
+      <div class="type-card">
+        <div class="type-num">08</div>
+        <div class="type-tag">Sunday Fear</div>
+        <div class="type-title">日曜恐怖型</div>
+        <div class="type-desc">日曜18時から心が重くなる。「また月曜来る」という事実だけで消耗。コンビニスイーツで耐えている。</div>
+        <div class="type-aru">日曜18時からHP減る</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ARTICLES -->
+<section class="section">
+  <div class="container">
+    <div class="section-label">Knowledge</div>
+    <h2 class="section-title">ストレスを<br>理解する</h2>
+    <div class="articles-layout">
+      <div class="article-main">
+        <div class="article-main-img">無</div>
+        <div class="article-main-body">
+          <div class="article-cat">特集</div>
+          <h3 class="article-main-title">「辞めたい」より「休みたい」——それが正直なところ。燃え尽きる前に知っておくこと</h3>
+          <p class="article-main-desc">毎月「もう無理」が更新されている人へ。有給ではなく"強制停止イベント"を待っている状態は、すでに限界のサイン。今できる小さな行動を解説します。</p>
+        </div>
+      </div>
+      <div class="article-list">
+        <div class="article-item">
+          <div class="article-item-cat">会議・組織</div>
+          <div class="article-item-title">会議で会議を増やす組織から抜け出す唯一の方法</div>
+          <div class="article-item-meta">5分で読める · 3,421 views</div>
+        </div>
+        <div class="article-item">
+          <div class="article-item-cat">コントロール</div>
+          <div class="article-item-title">「自分で決められない」が一番しんどい理由</div>
+          <div class="article-item-meta">4分で読める · 2,887 views</div>
+        </div>
+        <div class="article-item">
+          <div class="article-item-cat">人間関係</div>
+          <div class="article-item-title">優しい人が便利屋化しないための境界線の引き方</div>
+          <div class="article-item-meta">6分で読める · 4,102 views</div>
+        </div>
+        <div class="article-item">
+          <div class="article-item-cat">転職</div>
+          <div class="article-item-title">3年目の「淡々モード」は危険信号なのか</div>
+          <div class="article-item-meta">5分で読める · 1,934 views</div>
+        </div>
+        <div class="article-item">
+          <div class="article-item-cat">セルフケア</div>
+          <div class="article-item-title">日曜18時から心を守る「週末の終わり方」設計</div>
+          <div class="article-item-meta">3分で読める · 5,312 views</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- VOICE -->
+<section class="voice-section">
+  <div class="container">
+    <div class="voice-grid">
+      <div>
+        <div class="section-label" style="color:var(--accent2)">Real Voices</div>
+        <h2 class="section-title" style="color:var(--white);font-size:clamp(26px,3.5vw,42px)">職場では<br>言えない本音</h2>
+        <p style="font-size:14px;color:rgba(255,255,255,.45);line-height:2.2;margin-bottom:36px">同じタイプ同士だから話せることがある。診断結果ごとのコミュニティで、匿名で繋がれます。</p>
+        <button class="btn-primary">コミュニティを見る →</button>
+      </div>
+      <div class="voice-cards">
+        <div class="voice-card">
+          <div class="voice-header">
+            <div class="voice-avatar">S</div>
+            <div>
+              <div class="voice-name">30代・製造業</div>
+              <div class="voice-meta">燃え尽き型 · 2日前</div>
+            </div>
+          </div>
+          <p class="voice-text">「応急処置が10年運用」まさにうちの工場。誰も触れない謎設定値もある。それで削られてた理由がやっと言語化できた。</p>
+          <span class="voice-tag">ストレス指数 91</span>
+        </div>
+        <div class="voice-card">
+          <div class="voice-header">
+            <div class="voice-avatar" style="background:#555">Y</div>
+            <div>
+              <div class="voice-name">20代・IT企業</div>
+              <div class="voice-meta">スイッチOFF不能型 · 5日前</div>
+            </div>
+          </div>
+          <p class="voice-text">Teamsの通知音聞くだけで心拍数上がるようになってた。診断で「スイッチOFF不能型」って出て、問題が仕事量じゃなくて構造だと気づいた。</p>
+          <span class="voice-tag">ストレス指数 84</span>
+        </div>
+        <div class="voice-card">
+          <div class="voice-header">
+            <div class="voice-avatar" style="background:#3a6e44">A</div>
+            <div>
+              <div class="voice-name">30代・事務職</div>
+              <div class="voice-meta">感情飲み込み型 · 1週間前</div>
+            </div>
+          </div>
+          <p class="voice-text">「これ意味あるんですか？」を3年飲み込んできた。サウナ行って「みんなもしんどい」をSNSで確認して、また月曜来る——この繰り返しに名前がついた気がした。</p>
+          <span class="voice-tag">ストレス指数 79</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <div class="container">
+    <h2 class="cta-title">「また月曜来る」<br>その前に、<span>自分を知ろう。</span></h2>
+    <p class="cta-sub">3分間の診断で、あなたのタイプと今すぐできる対処法がわかります。<br>完全無料・登録不要・SNSシェア対応。</p>
+    <button class="btn-primary" style="margin:0 auto;font-size:15px;padding:20px 44px" onclick="scrollToQuiz()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      今すぐ診断する（無料）
+    </button>
+    <p style="font-size:12px;color:var(--ink3);margin-top:18px">48,000人以上が診断済み</p>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <div class="footer-inner">
+      <div class="footer-logo">会社員ストレス診断</div>
+      <div class="footer-links">
+        <a href="#">運営について</a>
+        <a href="#">プライバシーポリシー</a>
+        <a href="#">お問い合わせ</a>
+        <a href="#">広告掲載</a>
+      </div>
+    </div>
+    <p class="footer-copy">© 2026 会社員ストレス診断. このサイトは医療行為を目的とするものではありません。深刻な症状がある場合は専門家にご相談ください。</p>
+  </div>
+</footer>
+
+<script>
+const questions=[
+  {
+    q:"朝起きた瞬間、「帰りたい」「行きたくない」と感じることがありますか？",
+    aru:"起きた瞬間「帰りたい」",
+    opts:["毎日、秒速で思う","週の半分以上","たまにある","あまりない"]
+  },
+  {
+    q:"仕事が終わっても、頭の中で仕事のことが止まらないことがありますか？",
+    aru:"Teams通知音でHP削られる",
+    opts:["帰宅後もずっと続く","しばらく続く","少し気になる程度","すぐ切り替えられる"]
+  },
+  {
+    q:"「これ意味あるんですか？」と思っても飲み込んでしまうことがありますか？",
+    aru:"「これ意味あるんですか？」を飲み込む",
+    opts:["ほぼ毎日飲み込んでる","よくある","たまにある","あまりない"]
+  },
+  {
+    q:"自分の仕事や状況を、自分でコントロールできていると感じますか？",
+    aru:"「一旦様子見」が永久に続く",
+    opts:["全くできていない","あまりできていない","少しできている","十分できている"]
+  },
+  {
+    q:"台風・地震速報や体調不良に「少し期待してしまう」感覚がありますか？",
+    aru:"台風・地震速報に少し期待してしまう",
+    opts:["正直、かなりある","たまにある","そういえばある","ほとんどない"]
+  },
+  {
+    q:"職場の人間関係（上司・お局・派閥など）でHP（体力・気力）を消耗していますか？",
+    aru:"仕事より人で削られる",
+    opts:["かなり削られている","まあまあ削られる","少し気になる","あまり影響ない"]
+  },
+  {
+    q:"日曜日の夕方（18時前後）から、気分が重くなることがありますか？",
+    aru:"日曜18時からHP減る",
+    opts:["毎週必ずある","だいたいある","ときどきある","あまりない"]
+  },
+  {
+    q:"今の仕事に「意味」や「やりがい」を感じられていますか？",
+    aru:"意味が見えない仕事ほど疲れる",
+    opts:["全く感じない","あまり感じない","少し感じる","十分感じる"]
+  }
+];
+
+const results=[
+  {
+    min:0,max:12,
+    level:"RESULT — 深刻度：比較的低め",
+    badge:"日曜恐怖型 / 予備段階",
+    title:"今はまだ大丈夫。でも予防が大事な段階です",
+    aru:"<strong>「金曜夜だけ人生楽しい」</strong>くらいの余裕はあるはず。ただし環境が変われば急変する可能性も。",
+    desc:"現在のストレス水準は比較的低いですが、ジワジワと積み重なるタイプのストレスは気づきにくいのが特徴です。「コンビニスイーツで耐える」「サウナで回復する」——そういった小さな逃げ場を意識的に確保しておくことが重要です。"
+  },
+  {
+    min:13,max:19,
+    level:"RESULT — 深刻度：要注意",
+    badge:"感情飲み込み型 / 冷め切り型",
+    title:"3年目の「淡々モード」、それ本当に大丈夫ですか？",
+    aru:"<strong>「期待しすぎない」が最適解になってしまっている</strong>状態。空虚感と疲弊が静かに蓄積されています。",
+    desc:"表面上は落ち着いて見えますが、感情をずっと飲み込んでいる状態です。「これ意味あるんですか？」を言えない職場環境、自分で決められない仕事——コントロール不能感が地味に重い。週に一度だけでも、誰かに本音を話せる場を作ることが先決です。"
+  },
+  {
+    min:20,max:26,
+    level:"RESULT — 深刻度：高い",
+    badge:"スイッチOFF不能型 / 過緊張型",
+    title:"「仕事量」じゃなくて「構造」に問題があります",
+    aru:"<strong>Teamsの通知音だけでHP削られる</strong>ようになっていたら、それはもう体が限界を知らせているサインです。",
+    desc:"仕事が終わっても頭が切れない、通知を見るだけで疲れる——これはサボりでも弱さでもありません。ON/OFFの切り替え構造が壊れている状態です。「一番しんどいのはコントロール不能感」という本質を理解した上で、今すぐ物理的な境界線（通知オフ・退勤後の連絡禁止など）を作ることが急務です。"
+  },
+  {
+    min:27,max:32,
+    level:"RESULT — 深刻度：非常に高い",
+    badge:"燃え尽き型 / 孤立無援型",
+    title:"「もう無理」が毎月更新されているなら、今すぐ止まってください",
+    aru:"<strong>有給より「強制停止イベント（台風・インフル）」を待っている</strong>状態は、すでに深刻な限界サインです。",
+    desc:"真面目で責任感が強く、改善しようとするほど疲弊していきます。「引き継ぎ資料が引き継ぐ気ゼロ」の環境で、あなただけが全部抱えていませんか？問題は仕事量だけじゃない——感情労働と意味のない仕事の積み重ねが一番しんどい。転職の前に、まず「休む」ことを許可してください。"
+  }
+];
+
+let current=0;
+let total=0;
+
+function initQuiz(){
+  renderQuestion();
+  updateDots();
+}
+
+function renderQuestion(){
+  const q=questions[current];
+  document.getElementById('quiz-num').textContent=`Q${current+1} / ${questions.length}`;
+  const qEl=document.getElementById('quiz-q');
+  qEl.innerHTML=q.q+`<span class="aru">${q.aru}</span>`;
+  const opts=document.getElementById('quiz-options');
+  const labels=['A','B','C','D'];
+  const scoreMap=[4,3,2,1];
+  opts.innerHTML=q.opts.map((o,i)=>
+    `<button class="quiz-btn" onclick="selectOpt(this,${scoreMap[i]})"><span>${labels[i]}</span>${o}</button>`
+  ).join('');
+}
+
+function updateDots(){
+  const prog=document.getElementById('quiz-progress');
+  prog.innerHTML=questions.map((_,i)=>{
+    let cls='quiz-dot';
+    if(i<current)cls+=' done';
+    else if(i===current)cls+=' active';
+    return `<div class="${cls}"></div>`;
+  }).join('');
+}
+
+function selectOpt(el,score){
+  document.querySelectorAll('.quiz-btn').forEach(b=>b.classList.remove('selected'));
+  el.classList.add('selected');
+  total+=score;
+  setTimeout(()=>{
+    if(current<questions.length-1){
+      current++;
+      renderQuestion();
+      updateDots();
+    }else{
+      showResult();
+    }
+  },280);
+}
+
+function showResult(){
+  const r=results.find(r=>total>=r.min&&total<=r.max)||results[results.length-1];
+  document.getElementById('result-level').textContent=r.level;
+  document.getElementById('result-badge').textContent=r.badge;
+  document.getElementById('result-title').textContent=r.title;
+  document.getElementById('result-aru').innerHTML=`<p>${r.aru}</p>`;
+  document.getElementById('result-desc').textContent=r.desc;
+  const preview=document.getElementById('result-preview');
+  preview.classList.add('show');
+  setTimeout(()=>preview.scrollIntoView({behavior:'smooth',block:'center'}),100);
+  document.querySelectorAll('.quiz-btn').forEach(b=>b.disabled=true);
+}
+
+function scrollToQuiz(){
+  document.getElementById('quiz-section').scrollIntoView({behavior:'smooth'});
+}
+function shareResult(){
+  const title=document.getElementById('result-title').textContent;
+  window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(title+'\n\n#会社員ストレス診断 #あるある')}`);
+}
+
+initQuiz();
+setTimeout(()=>{document.getElementById('pbar').style.width='72%'},500);
+let count=48214;
+setInterval(()=>{
+  if(Math.random()>.65){
+    count+=Math.floor(Math.random()*3)+1;
+    document.getElementById('counter').textContent=count.toLocaleString();
+  }
+},7000);
+</script>
+</body>
+</html>
